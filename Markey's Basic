@@ -8,51 +8,51 @@
 *
 */
 
-#define dira 8
-#define dirb 10
-#define pwma 9
-#define pwmb 11
+#include <IRremote.h>
+int RECV_PIN = 4;
+IRrecv irrecv(RECV_PIN); // IR sensor connected to pin 4 of Arduino
+decode_results results;
 
-void motor(int a, int b){
-  if (a >= 0){
-    digitalWrite(dira, 0);
-    analogWrite(pwma, a);
-  } else if (a < 0){
-    digitalWrite(dira, 1);
-    analogWrite(pwma, a+255);    
-  }
+const int relais_moteur1 = 2; // relay connected to pin 2 of  Adruino
+const int relais_moteur2 = 3; // // relay connected to pin 3 of  Adruino
 
-  if (b >= 0){
-    digitalWrite(dirb, 0);
-    analogWrite(pwmb, b);
-  } else if (a < 0){
-    digitalWrite(dirb, 1);
-    analogWrite(pwmb, b+255);    
-  }
-}
-void setup() {
-  // put your setup code here, to run once:
-pinMode(dira, OUTPUT);
-pinMode(dirb, OUTPUT);
-
-
+void setup()
+{ irrecv.enableIRIn(); ////Initializes the infrared receiver
+pinMode(relais_moteur1, OUTPUT);
+pinMode(relais_moteur2, OUTPUT);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-motor(255,255); // maju kenceng
-delay(3000); // delay 3 detik
-motor(0,0); // mati
-delay(1000); // delay 1 detik
-motor(-255, -255); // mundur kenceng
-delay(3000);
-motor(100,100); // maju pelan
-delay(3000); // delay 3 detik
-motor(0,0); // mati
-delay(1000); // delay 1 detik
-motor(-100, -100); // mundur pelan
+void loop()
+{ if (irrecv.decode(&results)) {
+if (results.value==0xFF18E7)//press the 2 key
+{
+digitalWrite(relais_moteur1, HIGH);// the car is moving forward
+digitalWrite(relais_moteur2, HIGH);
+}
+if (results.value==0xFF5AA5)//press the 6 key
+{
+digitalWrite(relais_moteur1, HIGH);
+digitalWrite(relais_moteur2, LOW); // the car is moving right
+}
+if (results.value==0xFF10EF)//press the 4 key
+{
+digitalWrite(relais_moteur1, LOW);
+digitalWrite(relais_moteur2, HIGH); //the car is moving left
+}
+if (results.value==0xFF38C7)// press the 5 key
+{
+digitalWrite(relais_moteur1, LOW);// car stops
+digitalWrite(relais_moteur2, LOW);
+}
+irrecv.resume(); // Get the following value
+}
+
 }
 
 
-Source:
-https://pemula.anakkendali.com/tutorial-arduino-kontrol-motor-dc-dengan-driver-l298n/
+/*
+*Source:
+*https://pemula.anakkendali.com/tutorial-arduino-kontrol-motor-dc-dengan-driver-l298n/
+*https://projecthub.arduino.cc/samanfern/c71cd04b-79fd-4d0a-8a4b-b1dacc2f7725
+*https://www.robotique.tech/robotics/construction-of-a-remote-control-car-with-arduino/
+*/
